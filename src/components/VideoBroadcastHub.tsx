@@ -5,11 +5,9 @@ import {
   Volume2, 
   VolumeX, 
   Maximize2, 
-  Tv, 
   Users, 
   ChevronRight
 } from 'lucide-react';
-import { BROADCAST_SCHEDULE } from '../data/arnData';
 
 interface VideoBroadcastHubProps {
   onOpenLiveModal: () => void;
@@ -61,8 +59,8 @@ export const VideoBroadcastHub: React.FC<VideoBroadcastHubProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Main Video Stream Container - 8 cols */}
-        <div className="lg:col-span-8 bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800 relative flex flex-col justify-between">
+        {/* Main Video Stream Container */}
+        <div className="lg:col-span-12 bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800 relative flex flex-col justify-between">
           
           <div className="relative aspect-[16/9] w-full bg-black group overflow-hidden">
             <video
@@ -138,62 +136,6 @@ export const VideoBroadcastHub: React.FC<VideoBroadcastHubProps> = ({
                 <span>&bull; Next live briefing scheduled for 16:00 GMT from ARN London Bureau</span>
               </p>
             </div>
-          </div>
-
-        </div>
-
-        {/* Broadcast Lineup Guide - 4 cols */}
-        <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-5 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3 mb-4">
-              <h4 className="font-extrabold text-sm uppercase tracking-wider text-slate-900 dark:text-white flex items-center space-x-2 font-sans">
-                <Tv className="w-4 h-4 text-red-600" />
-                <span>Program Schedule</span>
-              </h4>
-              <span className="text-[11px] font-mono text-slate-400">GMT TRANSMISSION</span>
-            </div>
-
-            <div className="space-y-3.5">
-              {BROADCAST_SCHEDULE.map((prog) => (
-                <div
-                  key={prog.id}
-                  onClick={onOpenLiveModal}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                    prog.isNow
-                      ? 'bg-red-50/60 dark:bg-red-950/20 border-red-500/50 shadow-sm'
-                      : 'border-gray-100 dark:border-slate-800 hover:border-gray-300 dark:hover:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span
-                      className={`font-black font-mono text-[11px] ${
-                        prog.isNow ? 'text-red-600 flex items-center space-x-1' : 'text-slate-500 dark:text-slate-400'
-                      }`}
-                    >
-                      {prog.isNow && <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse inline-block mr-1"></span>}
-                      {prog.time}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-medium font-mono">{prog.duration}</span>
-                  </div>
-
-                  <h5 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white leading-snug">
-                    {prog.title}
-                  </h5>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-1">
-                    With {prog.host}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 pt-4 border-t border-gray-100 dark:border-slate-800 text-center">
-            <button
-              onClick={onOpenLiveModal}
-              className="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold text-xs py-2.5 rounded-lg border border-slate-700 transition-colors"
-            >
-              Open Interactive Studio & Schedule
-            </button>
           </div>
 
         </div>
