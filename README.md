@@ -111,13 +111,13 @@ schema is created automatically on the first API request.
    - `CRON_SECRET` — optional; protects the scheduled ingestion endpoint
 3. Deploy. Vercel builds the frontend (`dist/`) and serves the API from the
    `api/[...route].js` serverless function.
-4. Ingestion runs on the schedule in `vercel.json` (currently every 6 hours) via
+4. Ingestion runs on the schedule in `vercel.json` — currently `0 5 * * *`
+   (once daily at 05:00 UTC), which is the limit for Vercel's Hobby plan — via
    `GET /api/cron/ingest`. Trigger an immediate refresh any time by clicking
    **"Sync Wire"** in the UI or calling `POST /api/ingest`.
 
-> **Note:** Vercel's Hobby plan limits cron jobs to a daily schedule. Change the
-> `schedule` in `vercel.json` to `0 5 * * *` if the deploy rejects the current
-> frequency.
+> **Note:** Hobby accounts are capped at one cron run per day and at 2 cron
+> jobs. On a Pro plan you can tighten the `schedule` (e.g. `0 */6 * * *`).
 
 ### Standalone Node server (optional)
 

@@ -503,22 +503,51 @@ async function persistItem(item) {
   return inserted;
 }
 
+// Run async tasks with a bounded concurrency. Persisting a wire item costs
+// several database round trips, so processing them serially would make a full
+// ingestion cycle far too slow for a serverless function.
+async function mapWithConcurrency(items, limit, worker) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const current = nextIndex++;
+      results[current] = await worker(items[current]);
+    }
+  });
+
+  await Promise.all(runners);
+  return results;
+}
+
 export async function ingestLiveFeeds() {
   console.log(`[ARN Ingestion] Fetching ${WIRE_FEEDS.length} live wire feeds across all editorial beats...`);
 
   // Fetch every feed in parallel so a growing source list stays fast.
   const settled = await Promise.allSettled(WIRE_FEEDS.map(fetchFeedItems));
 
+  const items = [];
+  for (const result of settled) {
+    if (result.status === 'fulfilled') items.push(...result.value);
+  }
+
+  // Collapse any repeated headlines up front so concurrent writers can't insert
+  // the same story twice.
+  const seenTitles = new Set();
+  const uniqueItems = items.filter((item) => {
+    if (seenTitles.has(item.title)) return false;
+    seenTitles.add(item.title);
+    return true;
+  });
+
   let newArticlesCount = 0;
   let newWireCount = 0;
 
-  for (const result of settled) {
-    if (result.status !== 'fulfilled') continue;
-    for (const item of result.value) {
-      const { article, wire } = await persistItem(item);
-      if (article) newArticlesCount++;
-      if (wire) newWireCount++;
-    }
+  const outcomes = await mapWithConcurrency(uniqueItems, 10, persistItem);
+  for (const { article, wire } of outcomes) {
+    if (article) newArticlesCount++;
+    if (wire) newWireCount++;
   }
 
   console.log(`[ARN Ingestion Complete] ${newArticlesCount} new articles ingested, ${newWireCount} new live wire updates ingested.`);

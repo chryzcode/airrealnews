@@ -248,9 +248,11 @@ const SEED_STAFF = [
 ];
 
 async function initSchema() {
-  // `staff` is referenced by foreign keys on other tables, so create it first.
-  await rawQuery(SCHEMA_STATEMENTS[0]);
-  await Promise.all(SCHEMA_STATEMENTS.slice(1).map((statement) => rawQuery(statement)));
+  // Run sequentially: several tables declare foreign keys that reference
+  // tables defined earlier in the list, so they must be created in order.
+  for (const statement of SCHEMA_STATEMENTS) {
+    await rawQuery(statement);
+  }
 
   const seedStatement =
     'INSERT INTO staff (id, name, role, bureau, email, avatar, bio, articles_count) ' +
